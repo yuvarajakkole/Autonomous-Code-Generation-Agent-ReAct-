@@ -10,7 +10,7 @@ build/
 .mypy_cache/
 htmlcov/
 .coverage
-
+venv/
 # Node
 node_modules/
 dist/
