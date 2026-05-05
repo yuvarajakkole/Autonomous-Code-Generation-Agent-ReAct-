@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --text-color: #333;
+            --button-color: #fff;
+            --button-hover-color: #e9ecef;
+            --gap-size: 10px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--gap-size);
+            max-width: 400px;
+            width: 100%;
+            padding: var(--gap-size);
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .display {
+            grid-column: span 4;
+            background-color: var(--secondary-color);
+            color: #fff;
+            padding: 20px;
+            font-size: 2rem;
+            text-align: right;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: var(--button-color);
+            border: none;
+            padding: 20px;
+            font-size: 1.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        button.operator {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        button.operator:hover {
+            background-color: #0056b3; /* Darker shade of primary color */
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <button class="operator" data-value="C">C</button>
+        <button class="operator" data-value="/">/</button>
+        <button class="operator" data-value="*">*</button>
+        <button class="operator" data-value="-">-</button>
+        <button data-value="7">7</button>
+        <button data-value="8">8</button>
+        <button data-value="9">9</button>
+        <button class="operator" data-value="+">+</button>
+        <button data-value="4">4</button>
+        <button data-value="5">5</button>
+        <button data-value="6">6</button>
+        <button class="operator" data-value="=">=</button>
+        <button data-value="1">1</button>
+        <button data-value="2">2</button>
+        <button data-value="3">3</button>
+        <button data-value="0" style="grid-column: span 2;">0</button>
+        <button data-value=".">.</button>
+    </div>
+    <script>
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('button');
+        let currentInput = '';
+        let operatorPressed = false;
+
+        /**
+         * Updates the display with the current input.
+         */
+        function updateDisplay() {
+            display.textContent = currentInput || '0';
+        }
+
+        /**
+         * Handles button click events.
+         * @param {string} value - The value of the button pressed.
+         */
+        function handleButtonClick(value) {
+            if (value === 'C') {
+                clearInput();
+            } else if (value === '=') {
+                calculateResult();
+            } else {
+                processInput(value);
+            }
+            updateDisplay();
+        }
+
+        /**
+         * Clears the current input.
+         */
+        function clearInput() {
+            currentInput = '';
+            operatorPressed = false;
+        }
+
+        /**
+         * Calculates the result of the current input.
+         */
+        function calculateResult() {
+            try {
+                if (currentInput.includes('/0')) {
+                    throw new Error('Division by zero');
+                }
+                currentInput = eval(currentInput).toString();
+                operatorPressed = false;
+            } catch {
+                currentInput = 'Error';
+            }
+        }
+
+        /**
+         * Processes the input value.
+         * @param {string} value - The value to process.
+         */
+        function processInput(value) {
+            if (['+', '-', '*', '/'].includes(value)) {
+                if (operatorPressed) {
+                    currentInput = currentInput.slice(0, -1);
+                }
+                operatorPressed = true;
+            } else {
+                operatorPressed = false;
+            }
+
+            if (currentInput === '0' && value !== '.') {
+                currentInput = value;
+            } else {
+                currentInput += value;
+            }
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.getAttribute('data-value');
+                handleButtonClick(value);
+            });
+        });
+    </script>
+</body>
+</html>

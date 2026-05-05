@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  # ── MongoDB ──────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: react_agent_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: react_agent
+
+  # ── Backend ───────────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: react_agent_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock   # Docker-in-Docker for sandbox
+    environment:
+      MONGODB_URL: mongodb://mongodb:27017
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      MAX_ITERATIONS: ${MAX_ITERATIONS:-8}
+      QUALITY_THRESHOLD: ${QUALITY_THRESHOLD:-0.80}
+      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000"]'
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  # ── Frontend ──────────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: react_agent_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:

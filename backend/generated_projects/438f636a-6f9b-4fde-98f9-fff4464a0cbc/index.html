@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button class="operator" onclick="appendOperator('/')" id="divide">/</button>
+        <button class="operator" onclick="appendOperator('*')">*</button>
+        <button class="operator" onclick="appendOperator('-')">-</button>
+        <button onclick="appendNumber(7)">7</button>
+        <button onclick="appendNumber(8)">8</button>
+        <button onclick="appendNumber(9)">9</button>
+        <button class="operator" onclick="appendOperator('+')">+</button>
+        <button onclick="appendNumber(4)">4</button>
+        <button onclick="appendNumber(5)">5</button>
+        <button onclick="appendNumber(6)">6</button>
+        <button onclick="calculate()" id="equals">=</button>
+        <button onclick="appendNumber(1)">1</button>
+        <button onclick="appendNumber(2)">2</button>
+        <button onclick="appendNumber(3)">3</button>
+        <button onclick="appendDecimal()" id="decimal">.</button>
+        <button onclick="appendNumber(0)" style="grid-column: span 2;">0</button>
+    </div>
+
+    <script>
+        let displayValue = '0';
+        let pendingValue = null;
+        let operator = null;
+
+        // Update the display with the current value
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            display.textContent = displayValue;
+            toggleButtons();
+        }
+
+        // Clear the display and reset all values
+        function clearDisplay() {
+            displayValue = '0';
+            pendingValue = null;
+            operator = null;
+            updateDisplay();
+        }
+
+        // Append a number to the display
+        function appendNumber(number) {
+            if (displayValue === '0') {
+                displayValue = number.toString();
+            } else {
+                displayValue += number.toString();
+            }
+            updateDisplay();
+        }
+
+        // Append an operator and prepare for the next number
+        function appendOperator(op) {
+            if (operator !== null) {
+                showError('Consecutive operators not allowed');
+                return;
+            }
+            pendingValue = parseFloat(displayValue);
+            operator = op;
+            displayValue = '0';
+            updateDisplay();
+        }
+
+        // Append a decimal point if not already present
+        function appendDecimal() {
+            if (!displayValue.includes('.')) {
+                displayValue += '.';
+            }
+            updateDisplay();
+        }
+
+        // Calculate the result based on the current operator
+        function calculate() {
+            if (operator === null || pendingValue === null) {
+                showError('Invalid operation');
+                return;
+            }
+            const currentValue = parseFloat(displayValue);
+            let result;
+            switch (operator) {
+                case '+':
+                    result = pendingValue + currentValue;
+                    break;
+                case '-':
+                    result = pendingValue - currentValue;
+                    break;
+                case '*':
+                    result = pendingValue * currentValue;
+                    break;
+                case '/':
+                    if (currentValue === 0) {
+                        showError('Cannot divide by zero');
+                        return;
+                    }
+                    result = pendingValue / currentValue;
+                    break;
+                default:
+                    showError('Unknown operator');
+                    return;
+            }
+            displayValue = result.toString();
+            if (displayValue.length > 10) {
+                displayValue = parseFloat(displayValue).toPrecision(10).toString();
+            }
+            operator = null;
+            pendingValue = null;
+            updateDisplay();
+        }
+
+        // Display an error message temporarily
+        function showError(message) {
+            const display = document.getElementById('display');
+            display.textContent = message;
+            setTimeout(() => {
+                updateDisplay();
+            }, 2000);
+        }
+
+        // Toggle button states based on current input
+        function toggleButtons() {
+            const decimalButton = document.getElementById('decimal');
+            const equalsButton = document.getElementById('equals');
+            decimalButton.disabled = displayValue.includes('.');
+            equalsButton.disabled = operator === null || pendingValue === null;
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button onclick="appendNumber('7')">7</button>
+        <button onclick="appendNumber('8')">8</button>
+        <button onclick="appendNumber('9')">9</button>
+        <button class="operator" onclick="chooseOperation('/')">/</button>
+        <button onclick="appendNumber('4')">4</button>
+        <button onclick="appendNumber('5')">5</button>
+        <button onclick="appendNumber('6')">6</button>
+        <button class="operator" onclick="chooseOperation('*')">*</button>
+        <button onclick="appendNumber('1')">1</button>
+        <button onclick="appendNumber('2')">2</button>
+        <button onclick="appendNumber('3')">3</button>
+        <button class="operator" onclick="chooseOperation('-')">-</button>
+        <button onclick="appendNumber('0')">0</button>
+        <button onclick="appendNumber('.')">.</button>
+        <button class="operator" onclick="calculate()">=</button>
+        <button class="operator" onclick="chooseOperation('+')">+</button>
+    </div>
+
+    <script>
+        let currentOperand = '';
+        let previousOperand = '';
+        let operation = undefined;
+
+        const displayElement = document.getElementById('display');
+
+        // Clears the calculator display and resets operands and operation
+        function clearDisplay() {
+            currentOperand = '';
+            previousOperand = '';
+            operation = undefined;
+            updateDisplay();
+        }
+
+        // Appends a number or decimal point to the current operand
+        function appendNumber(number) {
+            if (number === '.' && currentOperand.includes('.')) return; // Prevent multiple decimals
+            currentOperand = currentOperand.toString() + number.toString();
+            updateDisplay();
+        }
+
+        // Sets the operation and moves the current operand to the previous operand
+        function chooseOperation(op) {
+            if (currentOperand === '' && op !== '-') return; // Prevent operation without a number, except for negative sign
+            if (currentOperand === '' && op === '-') {
+                currentOperand = '-';
+                updateDisplay();
+                return;
+            }
+            if (previousOperand !== '') {
+                calculate();
+            }
+            operation = op;
+            previousOperand = currentOperand;
+            currentOperand = '';
+        }
+
+        // Performs the calculation based on the selected operation
+        function calculate() {
+            let computation;
+            const prev = parseFloat(previousOperand);
+            const current = parseFloat(currentOperand);
+            if (isNaN(prev) || isNaN(current)) return; // Prevent calculation without valid numbers
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '*':
+                    computation = prev * current;
+                    break;
+                case '/':
+                    computation = current === 0 ? 'Error: Division by zero' : prev / current;
+                    break;
+                default:
+                    return;
+            }
+            currentOperand = computation;
+            operation = undefined;
+            previousOperand = '';
+            updateDisplay();
+        }
+
+        // Updates the calculator display with the current operand
+        function updateDisplay() {
+            displayElement.innerText = currentOperand;
+        }
+
+        // Initialize the calculator display
+        clearDisplay();
+    </script>
+</body>
+</html>

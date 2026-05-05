@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #f1f1f1;
+            --text-color: #333;
+            --button-color: #fff;
+            --button-hover-color: #e0e0e0;
+            --spacing: 10px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing);
+            max-width: 400px;
+            width: 100%;
+            padding: var(--spacing);
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .display {
+            grid-column: span 4;
+            background-color: var(--secondary-color);
+            padding: var(--spacing);
+            font-size: 2rem;
+            text-align: right;
+            border-radius: 4px;
+        }
+        button {
+            background-color: var(--button-color);
+            border: none;
+            padding: var(--spacing);
+            font-size: 1.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: var(--button-hover-color);
+        }
+        button:active {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <button onclick="clearDisplay()">C</button>
+        <button onclick="appendOperator('/')">/</button>
+        <button onclick="appendOperator('*')">*</button>
+        <button onclick="appendOperator('-')">-</button>
+        <button onclick="appendNumber(7)">7</button>
+        <button onclick="appendNumber(8)">8</button>
+        <button onclick="appendNumber(9)">9</button>
+        <button onclick="appendOperator('+')">+</button>
+        <button onclick="appendNumber(4)">4</button>
+        <button onclick="appendNumber(5)">5</button>
+        <button onclick="appendNumber(6)">6</button>
+        <button onclick="calculate()">=</button>
+        <button onclick="appendNumber(1)">1</button>
+        <button onclick="appendNumber(2)">2</button>
+        <button onclick="appendNumber(3)">3</button>
+        <button onclick="appendNumber(0)" style="grid-column: span 2;">0</button>
+        <button onclick="appendDecimal()">.</button>
+    </div>
+    <script>
+        let displayValue = '0';
+        let pendingOperator = null;
+        let firstOperand = null;
+
+        // Updates the calculator display with the current value
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            display.textContent = displayValue;
+        }
+
+        // Clears the display and resets all stored values
+        function clearDisplay() {
+            displayValue = '0';
+            pendingOperator = null;
+            firstOperand = null;
+            updateDisplay();
+        }
+
+        // Appends a number to the current display value
+        function appendNumber(number) {
+            if (displayValue === '0' || displayValue === 'Error') {
+                displayValue = String(number);
+            } else {
+                displayValue += String(number);
+            }
+            updateDisplay();
+        }
+
+        // Appends an operator and prepares for the next operand
+        function appendOperator(operator) {
+            if (firstOperand === null) {
+                firstOperand = parseFloat(displayValue);
+            } else if (pendingOperator) {
+                const result = performCalculation(pendingOperator, firstOperand, parseFloat(displayValue));
+                displayValue = String(result);
+                firstOperand = result;
+            }
+            pendingOperator = operator;
+            displayValue = '0';
+            updateDisplay();
+        }
+
+        // Appends a decimal point if not already present
+        function appendDecimal() {
+            if (!displayValue.includes('.')) {
+                displayValue += '.';
+                updateDisplay();
+            }
+        }
+
+        // Performs the calculation based on the current operator
+        function calculate() {
+            if (pendingOperator && firstOperand !== null) {
+                const result = performCalculation(pendingOperator, firstOperand, parseFloat(displayValue));
+                displayValue = String(result);
+                firstOperand = null;
+                pendingOperator = null;
+                updateDisplay();
+            }
+        }
+
+        // Performs the actual arithmetic operation
+        function performCalculation(operator, firstOperand, secondOperand) {
+            switch (operator) {
+                case '+':
+                    return firstOperand + secondOperand;
+                case '-':
+                    return firstOperand - secondOperand;
+                case '*':
+                    return firstOperand * secondOperand;
+                case '/':
+                    return secondOperand === 0 ? 'Error' : firstOperand / secondOperand;
+                default:
+                    return secondOperand;
+            }
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>

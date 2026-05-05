@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <div class="task-input">
+            <input type="text" id="taskInput" placeholder="Add a new task">
+            <button id="addTaskButton">Add</button>
+        </div>
+        <ul class="tasks" id="taskList"></ul>
+        <div class="empty-state" id="emptyState">No tasks yet!</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskInput = document.getElementById('taskInput');
+            const addTaskButton = document.getElementById('addTaskButton');
+            const taskList = document.getElementById('taskList');
+            const emptyState = document.getElementById('emptyState');
+
+            // Load tasks from local storage
+            function loadTasks() {
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks.forEach(task => {
+                    createTaskElement(task.text, task.completed);
+                });
+                updateEmptyState();
+            }
+
+            // Save tasks to local storage
+            function saveTasks() {
+                const tasks = [];
+                taskList.querySelectorAll('li').forEach(taskItem => {
+                    tasks.push({
+                        text: taskItem.querySelector('span').textContent,
+                        completed: taskItem.classList.contains('completed')
+                    });
+                });
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            // Update the empty state message
+            function updateEmptyState() {
+                if (taskList.children.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+
+            // Create a new task element
+            function createTaskElement(taskText, completed = false) {
+                const taskItem = document.createElement('li');
+                if (completed) {
+                    taskItem.classList.add('completed');
+                }
+
+                const taskSpan = document.createElement('span');
+                taskSpan.textContent = taskText;
+                taskSpan.addEventListener('click', function() {
+                    taskItem.classList.toggle('completed');
+                    saveTasks();
+                });
+
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.addEventListener('click', function() {
+                    taskList.removeChild(taskItem);
+                    updateEmptyState();
+                    saveTasks();
+                });
+
+                taskItem.appendChild(taskSpan);
+                taskItem.appendChild(removeButton);
+                taskList.appendChild(taskItem);
+            }
+
+            // Add a new task
+            function addTask() {
+                const taskText = taskInput.value.trim();
+                if (taskText === '') {
+                    alert('Please enter a task.');
+                    return;
+                }
+
+                const existingTasks = Array.from(taskList.querySelectorAll('li span')).map(span => span.textContent);
+                if (existingTasks.includes(taskText)) {
+                    alert('Task already exists.');
+                    return;
+                }
+
+                createTaskElement(taskText);
+                taskInput.value = '';
+                updateEmptyState();
+                saveTasks();
+            }
+
+            // Event listeners
+            addTaskButton.addEventListener('click', addTask);
+
+            taskInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    addTask();
+                }
+            });
+
+            // Initial load
+            loadTasks();
+        });
+    </script>
+</body>
+</html>
